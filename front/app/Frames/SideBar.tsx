@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ClaimRow } from "../Interfaces/types";
 import ClaimCard from "../Components/ClaimCard";
 import CircularProgress from '@mui/material/CircularProgress';
@@ -9,6 +9,7 @@ import AddressViewer from "../Components/AddressViewer";
 import { TokenMaps } from "../Constants/Const";
 import useNotification from "../Components/SnackBar";
 import { useAccount } from 'wagmi';
+import { useUserContext } from '../Context';
   interface ClaimResults{
     token: string,
     amount: string,
@@ -17,7 +18,9 @@ import { useAccount } from 'wagmi';
   }
 
 const SideBar = () => {
+    const divRef = useRef(null)
     const account = useAccount();
+    const {email,jwt,setJwt} =  useUserContext();
     const sendNotification = useNotification();
     const [claimables, setClaimables] = useState<ClaimRow[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
@@ -47,20 +50,56 @@ const SideBar = () => {
         ReadClaimables();
       }
     }
+    async function Disconnect(){
+      setJwt("")
+    }
   
     useEffect(()=>{
       if(true)
         ReadClaimables();
     },[]);
+    useEffect(() => {
+      if (divRef.current) {
+        // @ts-ignore: Unreachable code error
+        window.google.accounts.id.initialize({
+          nonce: account!.address?.toString(),
+          client_id:
+            '226077901873-96cek128l90clri0i55c0ii88bjbcsge.apps.googleusercontent.com',
+          // @ts-ignore: Unreachable code error
+          callback: (res, error) => {
+            console.log('res', res)
+            console.log('error', error)
+            if (!error) {
+              setJwt(res.credential);
+            }
+            // This is the function that will be executed once the authentication with google is finished
+          }
+        })
+        // @ts-ignore: Unreachable code error
+        window.google.accounts.id.renderButton(divRef.current, {
+          theme: 'filled_blue',
+          size: 'medium',
+          type: 'standard',
+          text: 'continue_with'
+        })
+      }
+    }, [divRef.current])
   return (
     <div className="flex flex-col w-1/3 max-w-[25rem] h-dvh bg-[#ADE8F3]">
         <div className="flex flex-row items-center justify-start gap-2 p-5">
             <img src='/Wallet.svg' className="h-5 w-5"></img>
             <AddressViewer address = {account.isConnected? account!.address!.toString():""}></AddressViewer>
         </div>
-        <div className="flex flex-row items-center justify-start gap-2 pl-5">
+        <div className="flex flex-wrap items-center justify-start gap-2 pl-5">
             <img src='/Email.svg' className="h-5 w-5"></img>
-            {/* <a>{email}</a> */}
+            {email &&jwt &&
+              <a>{email}</a> 
+              
+            }
+            {email &&jwt &&
+              <button onClick = {Disconnect}className=" pl-1 pr-1 pt-1 pb-1 hover:bg-[#2c9baf] justify-center align-middle border-2 rounded-lg border-[#2D3D50] text-[#2D3D50]">disconnect</button>
+            }
+            {!jwt && account.isConnected&& <div ref={divRef}/>}
         </div>
         <div className="bg-slate-600 h-0.5  m-5"></div>
         
