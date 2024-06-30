@@ -1,4 +1,3 @@
-import './globals.css'
 import { Exo } from 'next/font/google'
 import './globals.css'
 import ClientRootLayout from './layoutClient'
