@@ -1,0 +1,124 @@
+
+'use client'
+import { useEffect, useState } from 'react'
+import {ValidCoins} from "../Constants/Const";
+import { CircularProgress } from "@mui/material";
+import useNotification from "../Components/SnackBar";
+
+const Send = () => {
+  const sendNotification = useNotification();
+  const [amount, setAmount] = useState(0);
+  const [reciever, setReciever] = useState<string|undefined>();
+  const [balance, setBalance] = useState<number|undefined>(undefined);
+  // const [contractBalance, setContractBalance] = useState(0);
+  const [transactionMessage, setTransactionMessage] = useState("dinner");
+  const [loading, setLoading] = useState(false);
+  const [balanceLoding, setBalanceLoading] = useState(false);
+  const [selectedtoken, setSelectedToken] = useState<string>(ValidCoins[0].token_address);
+  async function ReadBalance() {
+    setBalanceLoading(true);
+    try {
+      // setBalance();
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setBalanceLoading(false);
+
+    }
+  }
+  async function Pay() {
+    event?.preventDefault();
+    setLoading(true);
+    try {
+      if(1)
+        sendNotification({msg:"Hey!! Token Sent successfully",variant:"success"});
+      else{
+        sendNotification({msg:"Unknown Error occured",variant:"error"});
+      }
+      
+    } catch (error) {
+      // eslint-disable-next-line no-console -- No UI exists yet to display errors
+      console.log(error);
+      sendNotification({msg:`Error sending token${error}`,variant:"error"});
+    } finally {
+      setLoading(false);
+    }
+  }
+  // ReadBalance();
+  useEffect(()=>{
+    if(true)
+      ReadBalance();
+  },[]);
+  return (
+    <div className="flex flex-col bg-[#D0F6FF] w-full pt-20 items-center ">
+      <div className="min-w-[40rem]  bg-[#81D6E3] rounded-xl max-w-80 border-[0.1rem] shadow-[0.1rem_0.1rem_0_0_rgba(0,0,0,1)] border-black">
+        <div className="flex h-16 bg-[#ADE8F2] rounded-t-xl border-b-[0.11rem] border-black pl-5 items-center">
+          <a className="font-bold text-lg">Send Money</a>
+        </div>
+        <form onSubmit={Pay}>
+          <div className="flex flex-col p-7 gap-4">
+              <div className="flex flex-row gap-5 items-center">
+                <a className="w-20 font-bold">Token</a>
+                <div>   
+                  <select id="tokens" value={selectedtoken} onChange={e=>{setSelectedToken(e.target.value)}} className="bg-[#81D6E3] border-[0.2rem] rounded-lg h-12 w-32 border-[#29A8BB] " name="tokens">
+                    {ValidCoins.map((token,index)=>(<option key={index} value={token.token_address}>
+                      <div className="flex flex-row">
+                        <img src={token.logo} className="w-4 h-4"></img>
+                        <a>{token.symbol}</a>
+                      </div>
+                      
+                      </option>))}
+                  </select>           
+                  <div className="">
+                    <a className=" font-light">Balance: </a>
+                    {(balanceLoding || balance==undefined)?<CircularProgress size={12} />:
+                      <a className="px-1">{balance}</a>
+                    }
+                  </div>
+
+                </div>        
+              </div>
+            <div className="flex flex-row gap-5 items-center">
+              <a className="w-20 font-bold">Amount</a>
+              <input className="bg-[#81D6E3] px-2 border-[0.2rem] rounded-lg h-10 w-32 border-[#29A8BB] "
+                        type="number"
+                        id='amount'
+                        name= 'amount'
+                        content={amount.toString()}
+                        onChange={e=> setAmount(Number(e.target.value))}
+                        placeholder="amount"/>
+            </div>
+            <div className="flex flex-row gap-5 items-center">
+              <a className="w-20 font-bold">To</a>
+              <input className="bg-[#81D6E3] border-[0.2rem] rounded-lg h-12 w-64 px-2 fon border-[#29A8BB] "
+                        type="email"
+                        id='reciever'
+                        name= 'reciever'
+                        content={reciever}
+                        onChange={e=> setReciever(e.target.value)}
+                        placeholder="eg. burntbanksy@gmail.com"
+              />
+            </div>
+            <div className="flex flex-row gap-5 items-center">
+              <a className="w-20 font-bold">Description</a>
+              <input className="bg-[#81D6E3] px-2 border-[0.2rem] rounded-lg h-12 w-64 border-[#29A8BB] "
+                        type="string"
+                        id='details'
+                        name= 'details'
+                        content={transactionMessage}
+                        onChange={e=> setTransactionMessage(" "+e.target.value)}
+                        placeholder="Description  (Optional)"
+              />
+            </div>
+            <div className="flex flex-row-reverse w-full ">
+            {!loading?<button disabled={!reciever|| !amount || !selectedtoken} className="w-[10rem] h-[3rem] bg-sky-600 hover:bg-sky-500 disabled:bg-gray-500 disabled:text-slate-700  border-gray-500 text-white  rounded text-xl font-bold" >Send</button>:<CircularProgress></CircularProgress>}
+              {/* <button className="w-[10rem] h-[3rem] bg-sky-600 hover:bg-sky-500 disabled:bg-gray-500 disabled:text-slate-700  border-gray-500 text-white  rounded text-xl">Transfer</button> */}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default Send
