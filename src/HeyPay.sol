@@ -23,7 +23,7 @@ struct ClaimData {
     address token_address;
     uint256 amount;
     address sender_address;
-    bytes32 memo;
+    bytes memo;
 }
 
 contract HeyPay is Ownable {
@@ -51,7 +51,7 @@ contract HeyPay is Ownable {
     /// @param amount amount of tokens to send to receiver, the contract should be approved before for the tokenAddress before
     function Deposit(
         bytes32 email,
-        bytes32 memo,
+        bytes memory memo,
         address tokenAddress,
         uint256 amount
     ) external {
