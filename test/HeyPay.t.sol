@@ -20,6 +20,8 @@ contract HeyPayTest is Test {
     Token public token2;
     Token public token3;
 
+    // hoax(alice, 100 ether);
+
     function setUp() public {
         heypay = new HeyPay();
         token1 = new Token("TEST1", "T1");
