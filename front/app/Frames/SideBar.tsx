@@ -9,6 +9,7 @@ import AddressViewer from "../Components/AddressViewer";
 import { TokenMaps } from "../Constants/Const";
 import useNotification from "../Components/SnackBar";
 import { useAccount } from 'wagmi';
+import { useUserContext } from '../Context';
   interface ClaimResults{
     token: string,
     amount: string,
@@ -19,8 +20,8 @@ import { useAccount } from 'wagmi';
 const SideBar = () => {
     const divRef = useRef(null)
     const account = useAccount();
+    const {email,jwt,setJwt} =  useUserContext();
     const sendNotification = useNotification();
-    const [jwtClaim, setJwtClaim] = useState<string | undefined>(undefined);
     const [claimables, setClaimables] = useState<ClaimRow[]|undefined>(undefined);
     const [loading, setLoading] = useState(false);
     async function ReadClaimables() {
@@ -49,14 +50,14 @@ const SideBar = () => {
         ReadClaimables();
       }
     }
+    async function Disconnect(){
+      setJwt("")
+    }
   
     useEffect(()=>{
       if(true)
         ReadClaimables();
     },[]);
-    useEffect(()=>{
-      console.log("JWT claim:",jwtClaim);
-    },[jwtClaim]);
     useEffect(() => {
       if (divRef.current) {
         // @ts-ignore: Unreachable code error
@@ -69,7 +70,7 @@ const SideBar = () => {
             console.log('res', res)
             console.log('error', error)
             if (!error) {
-              setJwtClaim(res.credential)
+              setJwt(res.credential);
             }
             // This is the function that will be executed once the authentication with google is finished
           }
@@ -89,9 +90,16 @@ const SideBar = () => {
             <img src='/Wallet.svg' className="h-5 w-5"></img>
             <AddressViewer address = {account.isConnected? account!.address!.toString():""}></AddressViewer>
         </div>
-        <div className="flex flex-row items-center justify-start gap-2 pl-5">
+        <div className="flex flex-wrap items-center justify-start gap-2 pl-5">
             <img src='/Email.svg' className="h-5 w-5"></img>
-            {!jwtClaim && account.isConnected&& <div ref={divRef}/>}
+            {email &&jwt &&
+              <a>{email}</a> 
+              
+            }
+            {email &&jwt &&
+              <button onClick = {Disconnect}className=" pl-1 pr-1 pt-1 pb-1 hover:bg-[#2c9baf] justify-center align-middle border-2 rounded-lg border-[#2D3D50] text-[#2D3D50]">disconnect</button>
+            }
+            {!jwt && account.isConnected&& <div ref={divRef}/>}
         </div>
         <div className="bg-slate-600 h-0.5  m-5"></div>
         
