@@ -15,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* <script src="https://accounts.google.com/gsi/client" async></script> */}
+      <script src="https://accounts.google.com/gsi/client" async></script>
       <ClientRootLayout>{children}</ClientRootLayout>
     </html>
   )
