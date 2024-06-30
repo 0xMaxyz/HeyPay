@@ -104,13 +104,20 @@ contract HeyPay is Ownable {
             }
             // check if this email has tokens for claiming 
             bytes32 email = keccak256(des_payload.email);
+
+            bytes memory nonce = des_payload.nonce;
+            address receiver;
+            assembly {
+                receiver := mload(add(nonce, 20))
+            }
+
             uint256 count = claimsIndex[email];
             if (count > 0) {
                 // then there are claimables
                 for (uint i = 0; i < count; i++) {
                     ClaimData memory cd = claims[email][i];
                     IERC20 token = IERC20(cd.token_address);
-                    token.transfer(msg.sender, cd.amount);
+                    token.transfer(receiver, cd.amount);
                 }
                 delete claims[email];
                 delete claimsIndex[email];
