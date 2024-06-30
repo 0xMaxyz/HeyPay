@@ -8,13 +8,13 @@ export interface token{
 export const ValidCoins:token[]=[
   {
     token_address:"0xa",
-    logo:"/HeyPay/USDT.png",
+    logo:"/USDT.png",
     symbol:"USDT",
     price:1
   },
   {
     token_address:"0xb",
-    logo:"/HeyPay/USDC.png",
+    logo:"/USDC.png",
     symbol:"USDC",
     price:50000
   }

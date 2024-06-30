@@ -96,7 +96,7 @@ const Send = () => {
                         name= 'reciever'
                         content={reciever}
                         onChange={e=> setReciever(e.target.value)}
-                        placeholder="eg. burntbanksy@gmail.com"
+                        placeholder="eg. larry.page@gmail.com"
               />
             </div>
             <div className="flex flex-row gap-5 items-center">
