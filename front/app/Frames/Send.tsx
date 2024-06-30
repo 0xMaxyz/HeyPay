@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import {ValidCoins} from "../Constants/Const";
 import { CircularProgress } from "@mui/material";
-import useNotification from "./SnackBar";
+import useNotification from "../Components/SnackBar";
 
 const Send = () => {
   const sendNotification = useNotification();
