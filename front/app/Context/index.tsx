@@ -60,7 +60,7 @@ export function UserContextProvider({
       const email = decodeObject.email;
       console.log("Email:",email);
       setEmail(email);
-     
+      setJwt(jwt);
     } catch (error) {
       console.log("Error Parsing JWT:",error)
     }
