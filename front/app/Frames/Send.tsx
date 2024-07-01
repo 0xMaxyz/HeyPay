@@ -29,8 +29,6 @@ const Send = () => {
   async function ReadBalance() {
     setBalanceLoading(true);
     try {
-      console.log("account: ", account.address)
-      console.log("token: ", selectedtoken.token_address)
       if(account.isConnected && selectedtoken.token_address){
         const balance = await publicClient.readContract({
           address: selectedtoken.token_address as `0x${string}`,
@@ -59,6 +57,9 @@ const Send = () => {
     try {
       if(allowance&&balance && allowance>=amount){
         console.log("Send Transaction");
+
+        console.log("Email:", reciever);
+        console.log("Email bytes:", keccak256(toHex(reciever!)));
         heyPayWriteContract({
           address: HeypayAddress as `0x${string}`,
           abi: HeyPayContractABI,

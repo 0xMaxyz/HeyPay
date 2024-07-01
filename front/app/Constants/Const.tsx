@@ -1,4 +1,4 @@
-export const HeypayAddress = "0x353c5E8402D1d21c2F571aEDeD02d65dd5b037E1";
+export const HeypayAddress = "0x4b85D8DDBAA76c207Cc36Ec9F7d097e88Bd712D9";
 export interface token{
   token_address:string,
   logo:string,
@@ -18,7 +18,7 @@ export const ValidCoins:token[]=[
     token_address:"0x036CbD53842c5426634e7929541eC2318f3dCF7e",
     logo:"/USDC.png",
     symbol:"USDC",
-    price:50000,
+    price:1,
     decimals:1000000
   }
 ]
@@ -31,4 +31,3 @@ function tm(){
 }
 
 export const TokenMaps = tm();
-console.log("Map", TokenMaps);
