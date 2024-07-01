@@ -6,7 +6,7 @@ import { CircularProgress } from "@mui/material";
 import useNotification from "../Components/SnackBar";
 import { publicClient } from '../Utils/client';
 import { erc20Abi, keccak256, parseEther, toHex } from 'viem';
-import { useAccount, useWriteContract } from 'wagmi';
+import { useAccount, useWriteContract,useWaitForTransactionReceipt } from 'wagmi';
 import { HeyPayContractABI } from '../ABI/HeyPayContractABI';
 
 const Send = () => {
@@ -19,8 +19,11 @@ const Send = () => {
   // const [contractBalance, setContractBalance] = useState(0);
   const [transactionMessage, setTransactionMessage] = useState("dinner");
   const [loading, setLoading] = useState(false);
-  const { data: tokenHash,isPending:approvePending,isSuccess:ApproveSuccess, writeContract:tokenWriteContract } = useWriteContract()
-  const { data: heypayHash,isPending:DepositPending,isSuccess:DepositSuccess, writeContract:heyPayWriteContract } = useWriteContract()
+  const { data: tokenHash, writeContract:tokenWriteContract } = useWriteContract();
+  const {isLoading:approvePending,isSuccess:ApproveSuccess}= useWaitForTransactionReceipt({hash:tokenHash});
+  const { data: heypayHash, writeContract:heyPayWriteContract } = useWriteContract();
+  const {isLoading:DepositPending,isSuccess:DepositSuccess}= useWaitForTransactionReceipt({hash:heypayHash});
+
   const [balanceLoding, setBalanceLoading] = useState(false);
   const [selectedtoken, setSelectedToken] = useState<token>(ValidCoins[0]);
   async function ReadBalance() {
@@ -96,6 +99,12 @@ const Send = () => {
       setLoading(false);
     }
   }
+  useEffect(() => {
+    if(ApproveSuccess){
+      sendNotification({msg:"Hey!! Token Sent successfully",variant:"success"});
+      ReadBalance();
+    }
+  }, [DepositSuccess]);
   useEffect(() => {
     if(ApproveSuccess){
       sendNotification({msg:"Hey!! Token Approved successfully",variant:"success"});
