@@ -1,7 +1,7 @@
 
 'use client'
 import { useEffect, useState } from 'react'
-import {HaypayAddress, token, ValidCoins} from "../Constants/Const";
+import {HeypayAddress, token, ValidCoins} from "../Constants/Const";
 import { CircularProgress } from "@mui/material";
 import useNotification from "../Components/SnackBar";
 import { publicClient } from '../Utils/client';
@@ -42,7 +42,7 @@ const Send = () => {
           address: selectedtoken.token_address as `0x${string}`,
           abi: erc20Abi,
           functionName: 'allowance',
-          args:[account!.address!, HaypayAddress]
+          args:[account!.address!, HeypayAddress]
         })
         setAllowance(Number(allowance)/selectedtoken.decimals);
         setBalance(Number(balance)/selectedtoken.decimals);
@@ -60,7 +60,7 @@ const Send = () => {
       if(allowance&&balance && allowance>=amount){
         console.log("Send Transaction");
         heyPayWriteContract({
-          address: HaypayAddress as `0x${string}`,
+          address: HeypayAddress as `0x${string}`,
           abi: HeyPayContractABI,
           functionName: 'Deposit',
           args: [ keccak256(toHex(reciever!)),
@@ -76,7 +76,7 @@ const Send = () => {
           address: selectedtoken.token_address as `0x${string}`,
           abi: erc20Abi,
           functionName: 'approve',
-          args: [HaypayAddress,BigInt(amount* selectedtoken.decimals)
+          args: [HeypayAddress,BigInt(amount* selectedtoken.decimals)
           ]
         });
       }

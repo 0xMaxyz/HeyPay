@@ -1,4 +1,4 @@
-export const HaypayAddress = "0x353c5E8402D1d21c2F571aEDeD02d65dd5b037E1";
+export const HeypayAddress = "0x353c5E8402D1d21c2F571aEDeD02d65dd5b037E1";
 export interface token{
   token_address:string,
   logo:string,
