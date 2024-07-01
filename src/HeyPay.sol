@@ -10,6 +10,7 @@ error ZerAmount();
 error NotEnoughBalance(uint256 balance, uint256 amount);
 error NotEnoughAllowance(uint256 allowance, uint256 amount);
 error InvalidKey();
+error InvalidJWT();
 error InvalidAuthToken();
 error InvalidAudience();
 error InvalidOperation();
@@ -29,12 +30,12 @@ struct ClaimData {
 contract HeyPay is Ownable {
     constructor() Ownable(msg.sender){ }
     mapping(bytes32 => ClaimData[]) public claims;
-    mapping(bytes32 => uint256) claimsIndex;
+    mapping(bytes32 => uint256) public claimsIndex;
     // jwrk keys: https://www.googleapis.com/oauth2/v3/certs
     bytes32 key1 =
-        0x496138b14fc36ee7a55ca439577efea5465a2a92a8de4c3678c708ae2fe9a416; // keccak256 of "3d580f0af7ace698a0cee7f230bca594dc6dbb55"
+        0x65deb342512e3a1c4d6fa05a87502057ab35ffa44a2f275d46b46bbad4da5ec3; // keccak256 of "3d580f0af7ace698a0cee7f230bca594dc6dbb55"
     bytes32 key2 =
-        0x350bc373c267c4ec2809cfb90aab4ab71dae8a082be34ad9139028355e95246d; // keccak256 of "2af90e87be140c20038898a6efa11283dab6031d"
+        0x5052b517af0be6f3437ee93cd21f7c247a1c4fd1ed4a8607b8c63e7dd1f5805d; // keccak256 of "2af90e87be140c20038898a6efa11283dab6031d"
 
     bytes modulus1 =
         hex"726867515a543374394d674e4276395f3471453538434c436244664561526439486750645f5a6d6a67315449596a48683155674d50566556656b7955324a6975555a50626e6c4562763857557378794e4e514a66415476664d625861556372655053645733327a49614d4f6554626e3056585a3374717835497969503049664a742d6b54394d696c47416b654a6e386d653778355f754e474f7069504357516178467854696b565574474f3541624768325054554c7a4b6a566a5a577751725042316671456536417236496d2d3352635a2d7a4f64334e3254686751457a4c4c526534524536625376425155757858396f5f416b59305343565a5a423256686a5159424e334555466d4b7344343672726e65426e363456647579336a5774425958413161764452436c305938795145424f727467696b457a5f686f67344f34454b50356d41565366384979666c5f524d6478724f41513d";
@@ -127,6 +128,9 @@ contract HeyPay is Ownable {
             {
                 revert NoClaims();
             }
+        }
+        else{
+            revert InvalidJWT();
         }
         }
 
