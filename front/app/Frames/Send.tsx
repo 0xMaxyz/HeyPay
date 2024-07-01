@@ -1,40 +1,92 @@
 
 'use client'
 import { useEffect, useState } from 'react'
-import {ValidCoins} from "../Constants/Const";
+import {HaypayAddress, token, ValidCoins} from "../Constants/Const";
 import { CircularProgress } from "@mui/material";
 import useNotification from "../Components/SnackBar";
+import { publicClient } from '../Utils/client';
+import { erc20Abi, keccak256, parseEther, toHex } from 'viem';
+import { useAccount, useWriteContract } from 'wagmi';
+import { HeyPayContractABI } from '../ABI/HeyPayContractABI';
 
 const Send = () => {
   const sendNotification = useNotification();
   const [amount, setAmount] = useState(0);
+  const account = useAccount();
   const [reciever, setReciever] = useState<string|undefined>();
   const [balance, setBalance] = useState<number|undefined>(undefined);
+  const [allowance, setAllowance] = useState<number|undefined>(undefined);
   // const [contractBalance, setContractBalance] = useState(0);
   const [transactionMessage, setTransactionMessage] = useState("dinner");
   const [loading, setLoading] = useState(false);
+  const { data: tokenHash,isPending:approvePending,isSuccess:ApproveSuccess, writeContract:tokenWriteContract } = useWriteContract()
+  const { data: heypayHash,isPending:DepositPending,isSuccess:DepositSuccess, writeContract:heyPayWriteContract } = useWriteContract()
   const [balanceLoding, setBalanceLoading] = useState(false);
-  const [selectedtoken, setSelectedToken] = useState<string>(ValidCoins[0].token_address);
+  const [selectedtoken, setSelectedToken] = useState<token>(ValidCoins[0]);
   async function ReadBalance() {
     setBalanceLoading(true);
     try {
-      // setBalance();
+      console.log("account: ", account.address)
+      console.log("token: ", selectedtoken.token_address)
+      if(account.isConnected && selectedtoken.token_address){
+        const balance = await publicClient.readContract({
+          address: selectedtoken.token_address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args:[account!.address!]
+        })
+        const allowance = await publicClient.readContract({
+          address: selectedtoken.token_address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'allowance',
+          args:[account!.address!, HaypayAddress]
+        })
+        setAllowance(Number(allowance)/selectedtoken.decimals);
+        setBalance(Number(balance)/selectedtoken.decimals);
+      }
     } catch (error) {
       console.log(error);
     }finally{
       setBalanceLoading(false);
-
     }
   }
   async function Pay() {
     event?.preventDefault();
     setLoading(true);
     try {
-      if(1)
-        sendNotification({msg:"Hey!! Token Sent successfully",variant:"success"});
-      else{
-        sendNotification({msg:"Unknown Error occured",variant:"error"});
+      if(allowance&&balance && allowance>=amount){
+        console.log("Send Transaction");
+        heyPayWriteContract({
+          address: HaypayAddress as `0x${string}`,
+          abi: HeyPayContractABI,
+          functionName: 'Deposit',
+          args: [ keccak256(toHex(reciever!)),
+            toHex(transactionMessage),
+            selectedtoken.token_address as `0x${string}`,
+            BigInt(amount * selectedtoken.decimals)
+          ]
+        });
       }
+      else{
+        console.log("Send Approve");
+        tokenWriteContract({
+          address: selectedtoken.token_address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: 'approve',
+          args: [HaypayAddress,BigInt(amount* selectedtoken.decimals)
+          ]
+        });
+      }
+      // console.log("1: ",keccak256(toHex(reciever!)))
+      // console.log("2: ",toHex(transactionMessage))
+      // console.log("3: ",selectedtoken.token_address)
+      // console.log("4: ",BigInt(amount * selectedtoken.decimals))
+
+      // if(1)
+        // sendNotification({msg:"Hey!! Token Sent successfully",variant:"success"});
+      // else{
+      //   sendNotification({msg:"Unknown Error occured",variant:"error"});
+      // }
       
     } catch (error) {
       // eslint-disable-next-line no-console -- No UI exists yet to display errors
@@ -44,11 +96,19 @@ const Send = () => {
       setLoading(false);
     }
   }
+  useEffect(() => {
+    if(ApproveSuccess){
+      sendNotification({msg:"Hey!! Token Approved successfully",variant:"success"});
+      ReadBalance();
+    }
+  }, [ApproveSuccess]);
   // ReadBalance();
   useEffect(()=>{
-    if(true)
-      ReadBalance();
-  },[]);
+    ReadBalance();
+  },[approvePending]);
+  useEffect(()=>{
+    ReadBalance();
+  },[selectedtoken, account.address]);
   return (
     <div className="flex flex-col bg-[#D0F6FF] w-full pt-20 items-center ">
       <div className="min-w-[40rem]  bg-[#81D6E3] rounded-xl max-w-80 border-[0.1rem] shadow-[0.1rem_0.1rem_0_0_rgba(0,0,0,1)] border-black">
@@ -60,8 +120,8 @@ const Send = () => {
               <div className="flex flex-row gap-5 items-center">
                 <a className="w-20 font-bold">Token</a>
                 <div>   
-                  <select id="tokens" value={selectedtoken} onChange={e=>{setSelectedToken(e.target.value)}} className="bg-[#81D6E3] border-[0.2rem] rounded-lg h-12 w-32 border-[#29A8BB] " name="tokens">
-                    {ValidCoins.map((token,index)=>(<option key={index} value={token.token_address}>
+                  <select id="tokens" value={JSON.stringify(selectedtoken)} onChange={e=>{setSelectedToken(JSON.parse(e.target.value))}} className="bg-[#81D6E3] border-[0.2rem] rounded-lg h-12 w-32 border-[#29A8BB] " name="tokens">
+                    {ValidCoins.map((token,index)=>(<option key={index} value={JSON.stringify(token)}>
                       <div className="flex flex-row">
                         <img src={token.logo} className="w-4 h-4"></img>
                         <a>{token.symbol}</a>
@@ -84,6 +144,8 @@ const Send = () => {
                         type="number"
                         id='amount'
                         name= 'amount'
+                        min= '0'
+                        step="any"
                         content={amount.toString()}
                         onChange={e=> setAmount(Number(e.target.value))}
                         placeholder="amount"/>
@@ -111,7 +173,8 @@ const Send = () => {
               />
             </div>
             <div className="flex flex-row-reverse w-full ">
-            {!loading?<button disabled={!reciever|| !amount || !selectedtoken} className="w-[10rem] h-[3rem] bg-sky-600 hover:bg-sky-500 disabled:bg-gray-500 disabled:text-slate-700  border-gray-500 text-white  rounded text-xl font-bold" >Send</button>:<CircularProgress></CircularProgress>}
+            {(!approvePending && !DepositPending )?<button disabled={!reciever|| !amount || !selectedtoken} className="w-[10rem] h-[3rem] bg-sky-600 hover:bg-sky-500 disabled:bg-gray-500 disabled:text-slate-700  border-gray-500 text-white  rounded text-xl font-bold" >
+              {(allowance!>=amount!)?"Send":"Approve"}</button>:<CircularProgress></CircularProgress>}
               {/* <button className="w-[10rem] h-[3rem] bg-sky-600 hover:bg-sky-500 disabled:bg-gray-500 disabled:text-slate-700  border-gray-500 text-white  rounded text-xl">Transfer</button> */}
             </div>
           </div>
